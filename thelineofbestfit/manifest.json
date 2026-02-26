@@ -1,0 +1,15 @@
+{
+    "id": "thelineofbestfit",
+    "name": "The Line of Best Fit",
+    "version": "0.1.0",
+    "description": "Album reviews and ratings from The Line of Best Fit.",
+    "author": "riff",
+    "capabilities": ["editorial"],
+    "permissions": {
+        "http": {
+            "reason": "Fetch album reviews from The Line of Best Fit",
+            "required_hosts": ["www.thelineofbestfit.com"]
+        }
+    },
+    "settings": []
+}

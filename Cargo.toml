@@ -1,5 +1,5 @@
 [workspace]
-members = ["editorial-common", "pitchfork", "allmusic", "northern-transmissions"]
+members = ["editorial-common", "pitchfork", "allmusic", "northern-transmissions", "thelineofbestfit"]
 resolver = "2"
 
 [profile.release]

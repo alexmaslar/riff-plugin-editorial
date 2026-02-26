@@ -9,6 +9,7 @@ WASM plugins that fetch album reviews and ratings from editorial sources for the
 | **allmusic** | [AllMusic](https://www.allmusic.com) | Ratings, review excerpts, reviewer attribution |
 | **northern-transmissions** | [Northern Transmissions](https://northerntransmissions.com) | Ratings (0-10), review excerpts, reviewer attribution |
 | **pitchfork** | [Pitchfork](https://pitchfork.com) | Ratings, review excerpts, reviewer attribution |
+| **thelineofbestfit** | [The Line of Best Fit](https://www.thelineofbestfit.com) | Ratings (0-10), full review text, reviewer attribution |
 
 ## Build
 
@@ -37,6 +38,10 @@ cp northern-transmissions/manifest.json /tmp/riff-dev-plugins/northern-transmiss
 mkdir -p /tmp/riff-dev-plugins/pitchfork
 cp target/wasm32-wasip1/release/riff_plugin_pitchfork.wasm /tmp/riff-dev-plugins/pitchfork/plugin.wasm
 cp pitchfork/manifest.json /tmp/riff-dev-plugins/pitchfork/
+
+mkdir -p /tmp/riff-dev-plugins/thelineofbestfit
+cp target/wasm32-wasip1/release/riff_plugin_thelineofbestfit.wasm /tmp/riff-dev-plugins/thelineofbestfit/plugin.wasm
+cp thelineofbestfit/manifest.json /tmp/riff-dev-plugins/thelineofbestfit/
 ```
 
 ## Project Structure
@@ -51,6 +56,9 @@ northern-transmissions/
   manifest.json
 pitchfork/
   src/pitchfork.rs          Search + match + JSON-LD rating extraction
+  manifest.json
+thelineofbestfit/
+  src/thelineofbestfit.rs   Progressive listing crawl + JSON-LD + full review extraction
   manifest.json
 ```
 
@@ -70,6 +78,11 @@ AllMusic includes additional false-positive protection for short/common titles:
 Northern Transmissions uses a hybrid approach:
 - WordPress REST API for search, review text, and date
 - Page HTML scraping for rating (0-10 in `<h2>`/`<span>` tags) and reviewer ("Words by" pattern)
+
+The Line of Best Fit uses progressive listing crawl (no search API):
+- Crawls `/albums?page=N` listing pages in batches of 25, caching slugs in Extism vars across calls
+- Matches albums by slug prefix (`artist-slug-album-slug`)
+- Extracts rating and metadata from JSON-LD, full review text from `c--article-copy__sections` div
 
 ## Plugin Guide
 

@@ -279,6 +279,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "riff-plugin-thelineofbestfit"
+version = "0.1.0"
+dependencies = [
+ "editorial-common",
+ "extism-pdk",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "rmp"
 version = "0.8.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
