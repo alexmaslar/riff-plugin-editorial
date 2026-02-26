@@ -259,6 +259,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "riff-plugin-northern-transmissions"
+version = "0.1.0"
+dependencies = [
+ "editorial-common",
+ "extism-pdk",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "riff-plugin-pitchfork"
 version = "0.1.0"
 dependencies = [

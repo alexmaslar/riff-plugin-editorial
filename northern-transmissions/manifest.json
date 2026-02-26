@@ -1,0 +1,15 @@
+{
+    "id": "northern-transmissions",
+    "name": "Northern Transmissions",
+    "version": "0.1.0",
+    "description": "Album reviews and ratings from Northern Transmissions.",
+    "author": "riff",
+    "capabilities": ["editorial"],
+    "permissions": {
+        "http": {
+            "reason": "Fetch album reviews from Northern Transmissions",
+            "required_hosts": ["northerntransmissions.com"]
+        }
+    },
+    "settings": []
+}

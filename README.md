@@ -7,6 +7,7 @@ WASM plugins that fetch album reviews and ratings from editorial sources for the
 | Plugin | Source | Data |
 |---|---|---|
 | **allmusic** | [AllMusic](https://www.allmusic.com) | Ratings, review excerpts, reviewer attribution |
+| **northern-transmissions** | [Northern Transmissions](https://northerntransmissions.com) | Ratings (0-10), review excerpts, reviewer attribution |
 | **pitchfork** | [Pitchfork](https://pitchfork.com) | Ratings, review excerpts, reviewer attribution |
 
 ## Build
@@ -29,6 +30,10 @@ mkdir -p /tmp/riff-dev-plugins/allmusic
 cp target/wasm32-wasip1/release/riff_plugin_allmusic.wasm /tmp/riff-dev-plugins/allmusic/plugin.wasm
 cp allmusic/manifest.json /tmp/riff-dev-plugins/allmusic/
 
+mkdir -p /tmp/riff-dev-plugins/northern-transmissions
+cp target/wasm32-wasip1/release/riff_plugin_northern_transmissions.wasm /tmp/riff-dev-plugins/northern-transmissions/plugin.wasm
+cp northern-transmissions/manifest.json /tmp/riff-dev-plugins/northern-transmissions/
+
 mkdir -p /tmp/riff-dev-plugins/pitchfork
 cp target/wasm32-wasip1/release/riff_plugin_pitchfork.wasm /tmp/riff-dev-plugins/pitchfork/plugin.wasm
 cp pitchfork/manifest.json /tmp/riff-dev-plugins/pitchfork/
@@ -37,12 +42,15 @@ cp pitchfork/manifest.json /tmp/riff-dev-plugins/pitchfork/
 ## Project Structure
 
 ```
-editorial-common/     Shared library (slugify, HTML parsing, types)
+editorial-common/           Shared library (slugify, HTML parsing, types)
 allmusic/
-  src/allmusic.rs     Search + match + JSON-LD rating extraction
-  manifest.json       Plugin manifest (id, capabilities, HTTP permissions)
+  src/allmusic.rs           Search + match + JSON-LD rating extraction
+  manifest.json             Plugin manifest (id, capabilities, HTTP permissions)
+northern-transmissions/
+  src/northern_transmissions.rs  WP REST API search + HTML rating extraction
+  manifest.json
 pitchfork/
-  src/pitchfork.rs    Search + match + JSON-LD rating extraction
+  src/pitchfork.rs          Search + match + JSON-LD rating extraction
   manifest.json
 ```
 
@@ -52,12 +60,16 @@ Each plugin implements `riff_get_album_reviews(input) -> EditorialResult`:
 
 1. Search the source site for the album (artist + title query)
 2. Match the correct album from search results via slug comparison
-3. Fetch the album page and extract structured data (JSON-LD)
+3. Fetch the album page and extract structured data (JSON-LD, HTML parsing, or REST API)
 4. Return rating, review excerpt, and reviewer attribution
 
 AllMusic includes additional false-positive protection for short/common titles:
 - Length ratio guard on substring slug matching
 - Exact slug fallback with JSON-LD `byArtist` artist verification
+
+Northern Transmissions uses a hybrid approach:
+- WordPress REST API for search, review text, and date
+- Page HTML scraping for rating (0-10 in `<h2>`/`<span>` tags) and reviewer ("Words by" pattern)
 
 ## Plugin Guide
 

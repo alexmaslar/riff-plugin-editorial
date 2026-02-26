@@ -233,19 +233,29 @@ fn parse_review_ajax(html: &str) -> (Option<String>, Option<String>) {
                 .map(|pos| h3_text[pos + " Review by ".len()..].trim().to_string())
         });
 
-    let excerpt = html
-        .find("<p>")
-        .and_then(|start| {
-            let inner_start = start + 3;
-            let inner_end = html[inner_start..].find("</p>")? + inner_start;
-            let text = strip_html_tags(&html[inner_start..inner_end]);
-            let trimmed = text.trim();
-            if trimmed.is_empty() {
-                None
+    let excerpt = {
+        let mut paragraphs = Vec::new();
+        let mut search_from = 0;
+        while let Some(p_pos) = html[search_from..].find("<p>") {
+            let abs_start = search_from + p_pos + 3;
+            if let Some(end_offset) = html[abs_start..].find("</p>") {
+                let abs_end = abs_start + end_offset;
+                let text = strip_html_tags(&html[abs_start..abs_end]);
+                let trimmed = text.trim();
+                if !trimmed.is_empty() {
+                    paragraphs.push(trimmed.to_string());
+                }
+                search_from = abs_end + 4;
             } else {
-                Some(trimmed.to_string())
+                break;
             }
-        });
+        }
+        if paragraphs.is_empty() {
+            None
+        } else {
+            Some(paragraphs.join("\n\n"))
+        }
+    };
 
     (excerpt, reviewer)
 }
