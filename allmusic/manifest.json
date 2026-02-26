@@ -1,0 +1,15 @@
+{
+    "id": "allmusic",
+    "name": "AllMusic",
+    "version": "0.1.0",
+    "description": "Album ratings from AllMusic",
+    "author": "riff",
+    "capabilities": ["editorial"],
+    "permissions": {
+        "http": {
+            "reason": "Fetch album ratings from AllMusic",
+            "required_hosts": ["www.allmusic.com"]
+        }
+    },
+    "settings": []
+}

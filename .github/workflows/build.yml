@@ -1,0 +1,56 @@
+name: Build WASM Plugins
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        plugin:
+          - name: pitchfork
+            crate: riff_plugin_pitchfork
+          - name: allmusic
+            crate: riff_plugin_allmusic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip1
+      - run: cargo build --target wasm32-wasip1 --release -p riff-plugin-${{ matrix.plugin.name }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.plugin.name }}-plugin
+          path: |
+            target/wasm32-wasip1/release/${{ matrix.plugin.crate }}.wasm
+            ${{ matrix.plugin.name }}/manifest.json
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        plugin:
+          - name: pitchfork
+            crate: riff_plugin_pitchfork
+          - name: allmusic
+            crate: riff_plugin_allmusic
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.plugin.name }}-plugin
+          path: dist/
+      - run: |
+          cp dist/target/wasm32-wasip1/release/${{ matrix.plugin.crate }}.wasm dist/${{ matrix.plugin.name }}-plugin.wasm
+          cp dist/${{ matrix.plugin.name }}/manifest.json dist/${{ matrix.plugin.name }}-manifest.json
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/${{ matrix.plugin.name }}-plugin.wasm
+            dist/${{ matrix.plugin.name }}-manifest.json

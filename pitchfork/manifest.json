@@ -1,0 +1,15 @@
+{
+    "id": "pitchfork",
+    "name": "Pitchfork",
+    "version": "0.1.0",
+    "description": "Album reviews and ratings from Pitchfork",
+    "author": "riff",
+    "capabilities": ["editorial"],
+    "permissions": {
+        "http": {
+            "reason": "Fetch album reviews from Pitchfork",
+            "required_hosts": ["pitchfork.com"]
+        }
+    },
+    "settings": []
+}
