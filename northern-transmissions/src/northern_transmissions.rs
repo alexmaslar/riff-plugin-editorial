@@ -151,24 +151,38 @@ fn search_and_match(
 }
 
 /// Extract a numeric rating (0-10) from the page HTML.
-/// The rating appears as a standalone number in `<h2>` or `<span>` tags.
+/// The rating appears in `<h2 class="review">` or `<h2 class="score">` tags
+/// (Beaver Builder template). Tags have attributes, so we match by prefix.
 fn parse_rating(html: &str) -> Option<f64> {
-    // First pass: scan <h2> tags
-    if let Some(rating) = extract_rating_from_tags(html, "<h2>", "</h2>") {
+    // Primary: <h2 class="review">9</h2> (the album's own rating)
+    if let Some(rating) = extract_rating_from_tags(html, "<h2 class=\"review\"", "</h2>") {
         return Some(rating);
     }
 
-    // Second pass: scan <span> tags
-    extract_rating_from_tags(html, "<span>", "</span>")
+    // Fallback: any <h2> tag containing a rating
+    if let Some(rating) = extract_rating_from_tags(html, "<h2", "</h2>") {
+        return Some(rating);
+    }
+
+    // Last resort: <span> tags
+    extract_rating_from_tags(html, "<span", "</span>")
 }
 
-/// Scan for tags and try to parse their text content as a rating.
-fn extract_rating_from_tags(html: &str, open_tag: &str, close_tag: &str) -> Option<f64> {
+/// Scan for tags (matched by prefix) and try to parse their text content as a rating.
+/// The open_tag is a prefix like `<h2` or `<h2 class="review"` — we skip to `>` to
+/// handle attributes.
+fn extract_rating_from_tags(html: &str, open_prefix: &str, close_tag: &str) -> Option<f64> {
     let mut search_from = 0;
 
     loop {
-        let tag_pos = html[search_from..].find(open_tag)?;
-        let abs_start = search_from + tag_pos + open_tag.len();
+        let tag_pos = html[search_from..].find(open_prefix)?;
+        let abs_tag_start = search_from + tag_pos;
+
+        // Skip past the closing '>' of the opening tag (handles attributes)
+        let Some(gt_offset) = html[abs_tag_start..].find('>') else {
+            break;
+        };
+        let abs_start = abs_tag_start + gt_offset + 1;
 
         let Some(end_offset) = html[abs_start..].find(close_tag) else {
             break;
