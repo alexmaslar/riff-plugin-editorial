@@ -220,8 +220,15 @@ fn extract_article_body(html: &str) -> Option<String> {
 
     let raw = &html[content_start..content_end];
 
+    // Insert paragraph breaks before block-level closing tags
+    let raw = raw
+        .replace("</p>", "\n\n")
+        .replace("<br>", "\n")
+        .replace("<br/>", "\n")
+        .replace("<br />", "\n");
+
     // Strip HTML tags
-    let text = strip_html_tags(raw);
+    let text = strip_html_tags(&raw);
 
     // Decode common HTML entities
     let text = text
@@ -235,25 +242,33 @@ fn extract_article_body(html: &str) -> Option<String> {
         .replace("&ndash;", "\u{2013}")
         .replace("&mdash;", "\u{2014}");
 
-    // Collapse whitespace
-    let mut collapsed = String::with_capacity(text.len());
-    let mut prev_ws = false;
-    for ch in text.chars() {
-        if ch.is_whitespace() {
-            if !prev_ws {
-                collapsed.push(' ');
+    // Collapse runs of whitespace while preserving paragraph breaks (\n\n)
+    let paragraphs: Vec<String> = text
+        .split("\n\n")
+        .map(|p| {
+            let mut collapsed = String::with_capacity(p.len());
+            let mut prev_ws = false;
+            for ch in p.chars() {
+                if ch.is_whitespace() {
+                    if !prev_ws {
+                        collapsed.push(' ');
+                    }
+                    prev_ws = true;
+                } else {
+                    collapsed.push(ch);
+                    prev_ws = false;
+                }
             }
-            prev_ws = true;
-        } else {
-            collapsed.push(ch);
-            prev_ws = false;
-        }
-    }
+            collapsed.trim().to_string()
+        })
+        .filter(|p| !p.is_empty())
+        .collect();
 
-    let trimmed = collapsed.trim();
-    if trimmed.is_empty() {
+    if paragraphs.is_empty() {
         return None;
     }
+
+    let trimmed = paragraphs.join("\n\n");
 
     // Truncate to ~2000 chars at a sentence boundary
     if trimmed.len() > 2000 {
