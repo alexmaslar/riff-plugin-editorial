@@ -11,5 +11,6 @@
             "required_hosts": ["pitchfork.com"]
         }
     },
-    "settings": []
+    "settings": [],
+    "icon_url": "/plugins/pitchfork/icon"
 }

@@ -11,5 +11,6 @@
             "required_hosts": ["www.allmusic.com"]
         }
     },
-    "settings": []
+    "settings": [],
+    "icon_url": "/plugins/allmusic/icon"
 }

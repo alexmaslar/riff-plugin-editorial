@@ -11,5 +11,6 @@
             "required_hosts": ["www.thelineofbestfit.com"]
         }
     },
-    "settings": []
+    "settings": [],
+    "icon_url": "/plugins/thelineofbestfit/icon"
 }
